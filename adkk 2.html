@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="ms">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SUSUN AKSARA! - Permainan Disleksia Arnab & Kura-Kura</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Lexend (Sangat Mesra Disleksia) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* Tetapan Fon Mesra Disleksia */
+        body {
+            font-family: 'Lexend', sans-serif;
+            background-color: #FFFDF0; /* Warna Krim Soft Pastel */
+            color: #1F2937;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        .btn-interaktif {
+            transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .btn-interaktif:active {
+            transform: scale(0.95);
+        }
+
+        /* Animasi Pop-Up Markah */
+        @keyframes popupSkor {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.1); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .animasi-popup {
+            animation: popupSkor 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #FEF3C7;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #F59E0B;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between p-2 sm:p-4">
+
+    <!-- BAR ATAS / HEADER -->
+    <header class="w-full max-w-4xl mx-auto flex justify-between items-center bg-amber-100/90 border-3 border-amber-300 rounded-2xl p-3 mb-3 shadow-sm">
+        <div class="flex items-center space-x-2">
+            <span class="text-3xl">🐇🐢</span>
+            <h1 class="text-xl sm:text-2xl font-black text-amber-950 tracking-wider">
+                SUSUN AKSARA!
+            </h1>
+        </div>
+        <div class="flex items-center space-x-2">
+            <!-- Butang Muzik Latar (Simbol Audio Sahaja - Tiada Bahasa Inggeris) -->
+            <button id="btnMuzik" onclick="toggleMuzikLatar()" class="bg-amber-200 hover:bg-amber-300 text-amber-950 font-bold p-3 rounded-xl border border-amber-400 flex items-center justify-center text-lg shadow-sm" title="Buka / Senyap Muzik">
+                <span id="ikonMuzik">🔇</span>
+            </button>
+        </div>
+    </header>
+
+    <!-- KANDUNGAN UTAMA (CONTAINER PERMAINAN) -->
+    <main class="w-full max-w-4xl mx-auto flex-grow flex flex-col justify-center items-center">
+
+        <!-- ========================================== -->
+        <!-- POP-UP OVERLAY: ANIMASI +20 MARKAH!        -->
+        <!-- ========================================== -->
+        <div id="popTambahMarkah" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center hidden">
+            <div class="bg-white border-4 border-emerald-400 rounded-3xl p-6 sm:p-8 text-center max-w-sm mx-auto shadow-2xl animasi-popup">
+                <div class="text-6xl mb-2">⭐ 🎉 ⭐</div>
+                <h3 class="text-4xl sm:text-5xl font-black text-emerald-600 mb-1">+20 MARKAH!</h3>
+                <p class="text-2xl font-black text-amber-900">TAHNIAH! EJAAN BETUL!</p>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- POP-UP OVERLAY: MAKLUM BALAS JAWAPAN SALAH -->
+        <!-- ========================================== -->
+        <div id="popJawapanSalah" class="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+            <div class="bg-white border-4 border-rose-400 rounded-3xl p-6 sm:p-8 text-center max-w-md w-full shadow-2xl animasi-popup">
+                <div class="text-6xl mb-2">🌱 💪</div>
+                <h3 class="text-3xl sm:text-4xl font-black text-rose-600 mb-2">TIDAK MENGAPA!</h3>
+                <p class="text-lg font-bold text-gray-700 mb-3">Jawapan yang betul ialah:</p>
+                <div id="jawapanSebenarTeks" class="bg-rose-50 border-2 border-rose-200 text-rose-950 font-black text-4xl py-3 px-6 rounded-2xl tracking-widest uppercase mb-6 inline-block">
+                    ---
+                </div>
+                <div>
+                    <button onclick="keSoalanSeterusnyaSelepasSalah()" class="w-full bg-amber-500 hover:bg-amber-600 text-white font-black text-xl py-4 px-6 rounded-2xl shadow-lg border-b-4 border-amber-700 btn-interaktif flex items-center justify-center space-x-2">
+                        <span>SOALAN SETERUSNYA</span>
+                        <span>➔</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- SKRIN 1: PENDAFTARAN NAMA MURID           -->
+        <!-- ========================================== -->
+        <section id="skrin1" class="w-full bg-white border-4 border-amber-300 rounded-3xl p-6 sm:p-8 shadow-xl text-center max-w-lg mx-auto">
+            <div class="text-6xl mb-2">🐇🐢</div>
+            
+            <!-- TAJUK UTAMA PADA SKRIN AWAL -->
+            <div class="bg-gradient-to-r from-amber-100 via-amber-200 to-amber-100 border-3 border-amber-400 rounded-2xl p-4 mb-6 shadow-md">
+                <h1 class="text-4xl sm:text-5xl font-black text-amber-950 tracking-wider">SUSUN AKSARA!</h1>
+            </div>
+
+            <h2 class="text-2xl font-black text-amber-950 mb-2">Selamat Datang!</h2>
+            <p class="text-gray-700 font-bold mb-6">Sila masukkan nama anda sebelum memulakan permainan.</p>
+            <div class="mb-6">
+                <label class="block text-left text-amber-900 font-black mb-2">Nama Murid:</label>
+                <input type="text" id="inputNama" placeholder="Contoh: AMIR" class="w-full text-2xl font-black p-4 rounded-2xl border-4 border-amber-300 bg-amber-50 focus:outline-none focus:border-amber-500 uppercase text-center" />
+                <p id="pesanRalatNama" class="text-rose-600 font-bold text-sm mt-2 hidden">⚠️ Sila isi nama anda terlebih dahulu!</p>
+            </div>
+            <button onclick="keSkrinPanduan()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-2xl py-4 px-6 rounded-2xl shadow-lg border-b-4 border-emerald-700 btn-interaktif flex items-center justify-center space-x-2">
+                <span>TERUSKAN</span>
+                <span>➔</span>
+            </button>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SKRIN 2: PANDUAN PERMAINAN                 -->
+        <!-- ========================================== -->
+        <section id="skrin2" class="w-full bg-white border-4 border-amber-300 rounded-3xl p-6 sm:p-8 shadow-xl max-w-xl mx-auto hidden">
+            <h2 class="text-3xl font-black text-amber-950 mb-4 text-center">📖 Panduan Permainan</h2>
+            <div class="space-y-4 mb-6">
+                <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl flex items-start space-x-3">
+                    <button onclick="sebutTeks('Lihat gambar dan tekan butang audio untuk mendengar petunjuk.')" class="bg-amber-200 hover:bg-amber-300 p-2 rounded-xl text-xl flex-shrink-0" title="Dengar Arahan">🔊</button>
+                    <p class="text-amber-950 font-bold text-lg">1. Lihat gambar dan tekan butang audio 🔊 untuk mendengar petunjuk.</p>
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl flex items-start space-x-3">
+                    <button onclick="sebutTeks('Tekan kepingan huruf besar untuk menyusun ejaan perkataan.')" class="bg-amber-200 hover:bg-amber-300 p-2 rounded-xl text-xl flex-shrink-0" title="Dengar Arahan">🔊</button>
+                    <p class="text-amber-950 font-bold text-lg">2. Tekan kepingan HURUF BESAR untuk menyusun ejaan perkataan.</p>
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl flex items-start space-x-3">
+                    <button onclick="sebutTeks('Tekan butang audio kecil pada huruf untuk mendengar sebutan huruf tersebut.')" class="bg-amber-200 hover:bg-amber-300 p-2 rounded-xl text-xl flex-shrink-0" title="Dengar Arahan">🔊</button>
+                    <p class="text-amber-950 font-bold text-lg">3. Tekan butang audio kecil 🔊 pada huruf untuk mendengar sebutan huruf.</p>
+                </div>
+                <div class="bg-amber-50 border-2 border-amber-200 p-4 rounded-2xl flex items-start space-x-3">
+                    <button onclick="sebutTeks('Semak jawapan anda. Setiap soalan yang betul memberikan 20 markah!')" class="bg-amber-200 hover:bg-amber-300 p-2 rounded-xl text-xl flex-shrink-0" title="Dengar Arahan">🔊</button>
+                    <p class="text-amber-950 font-bold text-lg">4. Tekan SEMAK. Setiap soalan yang betul mendapat 20 markah!</p>
+                </div>
+            </div>
+            <button onclick="mulaPermainan()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-white font-black text-2xl py-4 px-6 rounded-2xl shadow-lg border-b-4 border-emerald-700 btn-interaktif flex items-center justify-center space-x-2">
+                <span>MULA PERMAINAN</span>
+                <span>🚀</span>
+            </button>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SKRIN 3: SKRIN PERMAINAN / SOALAN         -->
+        <!-- ========================================== -->
+        <section id="skrin3" class="w-full bg-white border-4 border-amber-300 rounded-3xl p-4 sm:p-6 shadow-xl hidden">
+            <!-- Header Soalan & Markah -->
+            <div class="flex justify-between items-center mb-3 bg-amber-50 p-3 rounded-2xl border-2 border-amber-200">
+                <div class="flex items-center space-x-2">
+                    <span class="font-black text-amber-900">Soalan:</span>
+                    <span id="nomborSoalan" class="bg-amber-300 text-amber-950 font-black px-3 py-1 rounded-xl text-lg">1 / 5</span>
+                </div>
+                <div class="flex items-center space-x-2">
+                    <span class="font-black text-amber-900">Markah:</span>
+                    <span id="paparanMarkah" class="bg-emerald-200 text-emerald-950 font-black px-4 py-1 rounded-xl text-xl">0</span>
+                </div>
+            </div>
+
+            <!-- KOTAK ARAHAN SOALAN MESRA AUDIO -->
+            <div class="bg-amber-100/90 border-2 border-amber-300 rounded-2xl p-3 mb-4 flex items-center justify-between">
+                <p class="text-amber-950 font-black text-sm sm:text-base flex-grow">Sila susun huruf berdasarkan gambar yang diberi.</p>
+                <button onclick="sebutTeks('Sila susun huruf berdasarkan gambar yang diberi.')" class="bg-amber-300 hover:bg-amber-400 text-amber-950 p-2.5 rounded-xl border border-amber-400 font-bold ml-2 flex-shrink-0 shadow-sm" title="Dengar Arahan Soalan">
+                    🔊
+                </button>
+            </div>
+
+            <!-- Visual Gambar Sahaja (Fokus Utama) -->
+            <div class="flex items-center justify-center mb-6 bg-amber-50/50 p-4 rounded-2xl border-2 border-amber-100">
+                <div id="bekasGambarSVG" class="w-40 h-40 sm:w-48 sm:h-48 flex-shrink-0 bg-white p-2 rounded-2xl shadow-inner border-2 border-amber-200">
+                    <!-- SVG disuntik JS -->
+                </div>
+            </div>
+
+            <!-- Petak Jawapan Diisi -->
+            <div class="mb-6">
+                <p class="text-center text-xs font-black text-amber-800 uppercase tracking-wider mb-2">Ruangan Jawapan Anda (Tekan huruf untuk buang):</p>
+                <div id="bekasJawapan" class="flex flex-wrap justify-center gap-2 sm:gap-3 min-h-[70px]">
+                    <!-- Slot diisi JS -->
+                </div>
+            </div>
+
+            <!-- Pilihan Huruf Berpengacau -->
+            <div class="mb-6">
+                <p class="text-center text-xs font-black text-amber-800 uppercase tracking-wider mb-2">Pilih Huruf Di Bawah:</p>
+                <div id="bekasPilihanHuruf" class="flex flex-wrap justify-center gap-2 sm:gap-3">
+                    <!-- Kepingan huruf JS -->
+                </div>
+            </div>
+
+            <!-- Kawalan Padam & Semak -->
+            <div class="flex flex-wrap justify-center gap-3">
+                <button onclick="padamHurufTerakhir()" class="bg-orange-400 hover:bg-orange-500 text-white font-black py-3 px-5 rounded-2xl shadow border-b-4 border-orange-600 btn-interaktif flex items-center space-x-1">
+                    <span>⌫</span>
+                    <span>PADAM</span>
+                </button>
+                <button onclick="kosongkanSemuaJawapan()" class="bg-rose-400 hover:bg-rose-500 text-white font-black py-3 px-5 rounded-2xl shadow border-b-4 border-rose-600 btn-interaktif flex items-center space-x-1">
+                    <span>🗑️</span>
+                    <span>RESET</span>
+                </button>
+                <button onclick="semakJawapan()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black py-3 px-8 rounded-2xl shadow-lg border-b-4 border-emerald-700 btn-interaktif text-xl flex items-center space-x-2">
+                    <span>✓</span>
+                    <span>SEMAK JAWAPAN</span>
+                </button>
+            </div>
+
+            <!-- Status Maklum Balas -->
+            <div id="kotakMaklumBalas" class="mt-4 p-4 rounded-2xl text-center font-black text-xl hidden"></div>
+        </section>
+
+        <!-- ========================================== -->
+        <!-- SKRIN 4: PAPAN SKOR & MAKLUM BALAS FINAL  -->
+        <!-- ========================================== -->
+        <section id="skrin4" class="w-full bg-white border-4 border-amber-300 rounded-3xl p-5 sm:p-8 shadow-xl hidden text-center max-w-xl mx-auto">
+            <div class="inline-block bg-amber-100 p-4 rounded-full mb-3">
+                <span class="text-6xl">🏆</span>
+            </div>
+
+            <h2 class="text-3xl sm:text-4xl font-black text-amber-950 mb-1">Tahniah! Anda Tamat!</h2>
+            <p class="text-xl font-bold text-gray-700 mb-4">Hebat sekali, <span id="namaMuridPapanSkor" class="text-amber-600 uppercase font-black"></span>!</p>
+
+            <!-- KOTAK SKOR KESELURUHAN -->
+            <div class="bg-gradient-to-r from-amber-100 via-amber-50 to-amber-100 border-3 border-amber-300 rounded-3xl p-6 max-w-md mx-auto mb-6 shadow-inner">
+                <p class="text-amber-900 font-black text-sm uppercase tracking-wider mb-1">Jumlah Markah Anda</p>
+                <div class="text-6xl font-black text-amber-600 mb-2">
+                    <span id="markahAkhir">0</span> <span class="text-2xl text-amber-800">/ 100</span>
+                </div>
+
+                <!-- Maklum Balas Dinamik -->
+                <div class="flex justify-center items-center gap-2 mb-2">
+                    <p class="text-lg font-black text-gray-800">Maklum Balas:</p>
+                    <button onclick="sebutTeks(document.getElementById('teksMaklumBalasUtama').innerText)" class="bg-amber-200 hover:bg-amber-300 p-2 rounded-full border border-amber-400" title="Dengar Maklum Balas">🔊</button>
+                </div>
+                <p id="teksMaklumBalasUtama" class="text-amber-950 font-extrabold text-lg leading-relaxed bg-white p-4 rounded-2xl border border-amber-200 shadow-sm">
+                    --
+                </p>
+            </div>
+
+            <!-- STATUS PENGHANTARAN APPS SCRIPT -->
+            <div id="statusPenghantaran" class="mb-6 text-sm font-bold text-gray-600 bg-gray-100 p-3 rounded-xl max-w-md mx-auto">
+                ⏳ Menyediakan penghantaran rekod...
+            </div>
+
+            <div class="flex justify-center">
+                <button onclick="semulaPermainan()" class="bg-emerald-500 hover:bg-emerald-600 text-white font-black text-xl py-4 px-8 rounded-2xl shadow-lg border-b-4 border-emerald-700 btn-interaktif flex items-center space-x-2">
+                    <span>🔄</span>
+                    <span>MAIN SEMULA</span>
+                </button>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ========================================== -->
+    <!-- JAVASCRIPT LOGIK PERMAINAN SEPENUHNYA     -->
+    <!-- ========================================== -->
+    <script>
+        /* ----------------------------------------------------
+           1. PEMBOLEHUBAH APPSCRIPT (PAUTAN GOOGLE APPS SCRIPT)
+           ---------------------------------------------------- */
+        const APPSCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyDsjoikwEU7qKmyP4-C3s5Vw20i7ZIu5myo53Q2BU2vyOnFo_TfwriW0p9FyuEaMXeoA/exec';
+
+        /* ----------------------------------------------------
+           2. SENARAI DATA SOALAN (5 SOALAN @ 20 MARKAH)
+           ---------------------------------------------------- */
+        const senaraiSoalan = [
+            {
+                kata: "ARNAB",
+                svg: `<svg viewBox="0 0 200 200" class="w-full h-full">
+                        <circle cx="100" cy="120" r="50" fill="#FCE7F3" stroke="#F472B6" stroke-width="4"/>
+                        <ellipse cx="80" cy="50" rx="15" ry="45" fill="#FCE7F3" stroke="#F472B6" stroke-width="4"/>
+                        <ellipse cx="80" cy="50" rx="8" ry="30" fill="#F472B6"/>
+                        <ellipse cx="120" cy="50" rx="15" ry="45" fill="#FCE7F3" stroke="#F472B6" stroke-width="4"/>
+                        <ellipse cx="120" cy="50" rx="8" ry="30" fill="#F472B6"/>
+                        <circle cx="85" cy="110" r="6" fill="#1F2937"/>
+                        <circle cx="115" cy="110" r="6" fill="#1F2937"/>
+                        <polygon points="100,120 93,128 107,128" fill="#F43F5E"/>
+                        <circle cx="100" cy="150" r="12" fill="#FFFFFF" stroke="#F472B6" stroke-width="3"/>
+                      </svg>`
+            },
+            {
+                kata: "HUTAN",
+                svg: `<svg viewBox="0 0 200 200" class="w-full h-full">
+                        <rect x="0" y="140" width="200" height="60" fill="#059669"/>
+                        <polygon points="60,40 20,140 100,140" fill="#10B981"/>
+                        <polygon points="120,30 70,140 170,140" fill="#047857"/>
+                        <polygon points="160,60 120,140 200,140" fill="#34D399"/>
+                        <rect x="53" y="130" width="14" height="30" fill="#78350F"/>
+                        <rect x="113" y="120" width="14" height="40" fill="#78350F"/>
+                      </svg>`
+            },
+            {
+                kata: "POKOK",
+                svg: `<svg viewBox="0 0 200 200" class="w-full h-full">
+                        <rect x="85" y="110" width="30" height="70" fill="#B45309" stroke="#78350F" stroke-width="4" rx="5"/>
+                        <circle cx="100" cy="80" r="55" fill="#22C55E" stroke="#15803D" stroke-width="4"/>
+                        <circle cx="75" cy="70" r="35" fill="#4ADE80"/>
+                        <circle cx="120" cy="75" r="30" fill="#16A34A"/>
+                      </svg>`
+            },
+            {
+                kata: "JUARA",
+                svg: `<svg viewBox="0 0 200 200" class="w-full h-full">
+                        <path d="M 60 50 L 140 50 L 130 110 Q 100 140 70 110 Z" fill="#FACC15" stroke="#CA8A04" stroke-width="4"/>
+                        <rect x="85" y="135" width="30" height="25" fill="#CA8A04"/>
+                        <rect x="65" y="160" width="70" height="20" fill="#78350F" rx="4"/>
+                        <path d="M 60 65 C 30 65 30 95 65 95" stroke="#FACC15" stroke-width="5" fill="none"/>
+                        <path d="M 140 65 C 170 65 170 95 135 95" stroke="#FACC15" stroke-width="5" fill="none"/>
+                        <polygon points="100,65 105,80 120,80 107,90 112,105 100,95 88,105 93,90 80,80 95,80" fill="#FFFFFF"/>
+                      </svg>`
+            },
+            {
+                kata: "SEDIH",
+                svg: `<svg viewBox="0 0 200 200" class="w-full h-full">
+                        <circle cx="100" cy="120" r="50" fill="#FCE7F3" stroke="#F472B6" stroke-width="4"/>
+                        <!-- Telinga Ke Bawah (Sedih) -->
+                        <ellipse cx="65" cy="75" rx="14" ry="40" fill="#FCE7F3" stroke="#F472B6" stroke-width="4" transform="rotate(-25 65 75)"/>
+                        <ellipse cx="65" cy="75" rx="7" ry="25" fill="#F472B6" transform="rotate(-25 65 75)"/>
+                        <ellipse cx="135" cy="75" rx="14" ry="40" fill="#FCE7F3" stroke="#F472B6" stroke-width="4" transform="rotate(25 135 75)"/>
+                        <ellipse cx="135" cy="75" rx="7" ry="25" fill="#F472B6" transform="rotate(25 135 75)"/>
+                        <!-- Mata Sedih -->
+                        <path d="M 75 105 Q 85 98 90 108" stroke="#1F2937" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <path d="M 125 105 Q 115 98 110 108" stroke="#1F2937" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <!-- Hidung -->
+                        <polygon points="100,115 94,122 106,122" fill="#F43F5E"/>
+                        <!-- Mulut Lengkung Ke Bawah -->
+                        <path d="M 90 135 Q 100 126 110 135" stroke="#1F2937" stroke-width="4" fill="none" stroke-linecap="round"/>
+                        <!-- Titisan Air Mata (Nangis) -->
+                        <path d="M 75 115 Q 70 130 75 138 Q 80 130 75 115 Z" fill="#3B82F6"/>
+                        <path d="M 125 115 Q 120 130 125 138 Q 130 130 125 115 Z" fill="#3B82F6"/>
+                      </svg>`
+            }
+        ];
+
+        /* ----------------------------------------------------
+           3. KEADAAN PERMAINAN GLOBAL
+           ---------------------------------------------------- */
+        let indeksSoalanSemasa = 0;
+        let markahTerkumpul = 0;
+        let namaMurid = "";
+        let jawapanDiisi = [];
+        let muzikAktif = false;
+        let audioCtx = null;
+        let pemasaMuzik = null;
+
+        /* Warna Cerah Pastel untuk Kepingan Huruf */
+        const warnaKepingan = [
+            "bg-sky-200 border-sky-400 text-sky-950",
+            "bg-emerald-200 border-emerald-400 text-emerald-950",
+            "bg-amber-200 border-amber-400 text-amber-950",
+            "bg-rose-200 border-rose-400 text-rose-950",
+            "bg-purple-200 border-purple-400 text-purple-950",
+            "bg-orange-200 border-orange-400 text-orange-950",
+            "bg-teal-200 border-teal-400 text-teal-950",
+            "bg-indigo-200 border-indigo-400 text-indigo-950"
+        ];
+
+        /* ----------------------------------------------------
+           4. SISTEM AUDIO STRICT (BERHENTI SERTA-MERTA)
+           ---------------------------------------------------- */
+        function stopAllAudio() {
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.cancel();
+            }
+        }
+
+        function sebutTeks(teks) {
+            if (!('speechSynthesis' in window)) return;
+            
+            stopAllAudio(); // Hentikan mana-mana sebutan yang sedang berjalan serta-merta
+
+            const sebutan = new SpeechSynthesisUtterance(teks);
+            sebutan.lang = 'ms-MY'; // Bahasa Melayu
+            sebutan.rate = 0.8;    // Perlahan mesra disleksia
+            sebutan.pitch = 1.1;
+
+            window.speechSynthesis.speak(sebutan);
+        }
+
+        function sebutHuruf(huruf) {
+            sebutTeks(huruf);
+        }
+
+        /* ----------------------------------------------------
+           5. WEB AUDIO API - MUZIK LATAR SYNTHESIZER
+           ---------------------------------------------------- */
+        function toggleMuzikLatar() {
+            muzikAktif = !muzikAktif;
+            const ikon = document.getElementById('ikonMuzik');
+
+            if (muzikAktif) {
+                ikon.innerText = "🔊";
+                mulakanMuzikMelody();
+            } else {
+                ikon.innerText = "🔇";
+                hentikanMuzikMelody();
+            }
+        }
+
+        function mulakanMuzikMelody() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+
+            // Melodi rancak, ceria & pantas (Tempo 220ms, C-Major Pentatonic)
+            const notaFrek = [261.63, 329.63, 392.00, 523.25, 440.00, 523.25, 392.00, 659.25, 523.25, 392.00, 329.63, 392.00];
+            let carian = 0;
+
+            pemasaMuzik = setInterval(() => {
+                if (!muzikAktif) return;
+
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+
+                osc.type = (carian % 4 === 0) ? 'triangle' : 'sine';
+                const frek = notaFrek[carian % notaFrek.length];
+                osc.frequency.setValueAtTime(frek, audioCtx.currentTime);
+
+                const kelantangan = (carian % 4 === 0) ? 0.04 : 0.025;
+                gain.gain.setValueAtTime(kelantangan, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.18);
+
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.18);
+
+                carian++;
+            }, 220); // Tempo rancak 220ms
+        }
+
+        function hentikanMuzikMelody() {
+            if (pemasaMuzik) {
+                clearInterval(pemasaMuzik);
+                pemasaMuzik = null;
+            }
+        }
+
+        /* Kesan Bunyi (Sound Effects) */
+        function mainKesanBunyi(jenis) {
+            try {
+                const ctx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+
+                if (jenis === 'betul') {
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(880, ctx.currentTime + 0.35);
+                    gain.gain.setValueAtTime(0.15, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.35);
+                } else if (jenis === 'salah') {
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(220, ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(130, ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.08, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.3);
+                } else if (jenis === 'tekan') {
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(650, ctx.currentTime);
+                    gain.gain.setValueAtTime(0.05, ctx.currentTime);
+                    gain.gain.linearRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+                    osc.start();
+                    osc.stop(ctx.currentTime + 0.08);
+                }
+            } catch(e) {}
+        }
+
+        /* ----------------------------------------------------
+           6. NAVIGASI SKRIN PERMAINAN
+           ---------------------------------------------------- */
+        function keSkrinPanduan() {
+            stopAllAudio();
+            const inputN = document.getElementById('inputNama').value.trim();
+            const pesanRalat = document.getElementById('pesanRalatNama');
+
+            if (!inputN) {
+                pesanRalat.classList.remove('hidden');
+                return;
+            }
+
+            pesanRalat.classList.add('hidden');
+            namaMurid = inputN;
+
+            document.getElementById('skrin1').classList.add('hidden');
+            document.getElementById('skrin2').classList.remove('hidden');
+        }
+
+        function mulaPermainan() {
+            stopAllAudio();
+            indeksSoalanSemasa = 0;
+            markahTerkumpul = 0;
+
+            document.getElementById('skrin2').classList.add('hidden');
+            document.getElementById('skrin3').classList.remove('hidden');
+
+            muatSoalan();
+        }
+
+        /* ----------------------------------------------------
+           7. JANA HURUF PENGACAU (DISTRACTOR LETTERS)
+           ---------------------------------------------------- */
+        function janaHurufDenganPengacau(kataBetul) {
+            const hurufBetul = kataBetul.split('');
+            const abjadSemua = ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'R', 'S', 'T', 'U', 'W', 'Y'];
+            
+            const pengacau = [];
+            const bilPengacau = 2 + Math.floor(Math.random() * 2); // 2 atau 3 pengacau
+            
+            while (pengacau.length < bilPengacau) {
+                const h = abjadSemua[Math.floor(Math.random() * abjadSemua.length)];
+                if (!hurufBetul.includes(h) && !pengacau.includes(h)) {
+                    pengacau.push(h);
+                }
+            }
+            
+            const semuaHuruf = [...hurufBetul, ...pengacau];
+            
+            for (let i = semuaHuruf.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [semuaHuruf[i], semuaHuruf[j]] = [semuaHuruf[j], semuaHuruf[i]];
+            }
+            
+            return semuaHuruf;
+        }
+
+        /* ----------------------------------------------------
+           8. LOGIK PERMAINAN & KONTROL SOALAN
+           ---------------------------------------------------- */
+        function muatSoalan() {
+            stopAllAudio();
+            const dataSoalan = senaraiSoalan[indeksSoalanSemasa];
+            jawapanDiisi = [];
+
+            document.getElementById('nomborSoalan').innerText = `${indeksSoalanSemasa + 1} / ${senaraiSoalan.length}`;
+            document.getElementById('paparanMarkah').innerText = markahTerkumpul;
+
+            document.getElementById('bekasGambarSVG').innerHTML = dataSoalan.svg;
+
+            const kotakM = document.getElementById('kotakMaklumBalas');
+            kotakM.classList.add('hidden');
+            kotakM.className = "mt-4 p-4 rounded-2xl text-center font-black text-xl hidden transition-all";
+
+            paparSlotJawapan();
+
+            const arrayHurufAcak = janaHurufDenganPengacau(dataSoalan.kata);
+
+            const bekasPilihan = document.getElementById('bekasPilihanHuruf');
+            bekasPilihan.innerHTML = "";
+
+            arrayHurufAcak.forEach((huruf, idx) => {
+                const warnaGaya = warnaKepingan[idx % warnaKepingan.length];
+                
+                const btnKepingan = document.createElement('div');
+                btnKepingan.className = `flex flex-col items-center justify-center p-2 rounded-2xl border-4 shadow-md ${warnaGaya} btn-interaktif cursor-pointer hover:brightness-105`;
+                btnKepingan.style.minWidth = "60px";
+                btnKepingan.style.minHeight = "75px";
+                btnKepingan.id = `kepingan-${idx}`;
+
+                btnKepingan.innerHTML = `
+                    <button onclick="event.stopPropagation(); sebutHuruf('${huruf}')" class="bg-white/90 hover:bg-white text-xs p-1.5 rounded-full border mb-1 shadow-sm" title="Dengar Huruf">
+                        🔊
+                    </button>
+                    <span class="text-3xl sm:text-4xl font-black tracking-widest uppercase">${huruf}</span>
+                `;
+
+                btnKepingan.onclick = () => pilihHuruf(huruf, `kepingan-${idx}`);
+
+                bekasPilihan.appendChild(btnKepingan);
+            });
+        }
+
+        function paparSlotJawapan() {
+            const dataSoalan = senaraiSoalan[indeksSoalanSemasa];
+            const bekas = document.getElementById('bekasJawapan');
+            bekas.innerHTML = "";
+
+            for (let i = 0; i < dataSoalan.kata.length; i++) {
+                const slot = document.createElement('div');
+                const itemJawapan = jawapanDiisi[i];
+
+                if (itemJawapan) {
+                    slot.className = "w-12 h-14 sm:w-16 sm:h-20 bg-amber-200 border-4 border-amber-500 rounded-2xl flex items-center justify-center font-black text-2xl sm:text-4xl text-amber-950 shadow-md cursor-pointer hover:bg-amber-300";
+                    slot.innerText = itemJawapan.huruf;
+                    slot.title = "Tekan untuk keluarkan huruf ini";
+                    slot.onclick = () => keluarkanHuruf(i);
+                } else {
+                    slot.className = "w-12 h-14 sm:w-16 sm:h-20 bg-white/80 border-4 border-dashed border-amber-300 rounded-2xl flex items-center justify-center text-amber-300 text-2xl font-bold";
+                    slot.innerText = "_";
+                }
+                bekas.appendChild(slot);
+            }
+        }
+
+        function pilihHuruf(huruf, elemId) {
+            const dataSoalan = senaraiSoalan[indeksSoalanSemasa];
+            if (jawapanDiisi.length >= dataSoalan.kata.length) return;
+
+            mainKesanBunyi('tekan');
+            const elemKepingan = document.getElementById(elemId);
+            if (elemKepingan) {
+                elemKepingan.classList.add('opacity-40', 'pointer-events-none', 'scale-90');
+            }
+
+            jawapanDiisi.push({ huruf: huruf, elemId: elemId });
+            paparSlotJawapan();
+        }
+
+        function keluarkanHuruf(indeks) {
+            mainKesanBunyi('tekan');
+            const item = jawapanDiisi.splice(indeks, 1)[0];
+            if (item && item.elemId) {
+                const elemKepingan = document.getElementById(item.elemId);
+                if (elemKepingan) {
+                    elemKepingan.classList.remove('opacity-40', 'pointer-events-none', 'scale-90');
+                }
+            }
+            paparSlotJawapan();
+        }
+
+        function padamHurufTerakhir() {
+            if (jawapanDiisi.length === 0) return;
+            keluarkanHuruf(jawapanDiisi.length - 1);
+        }
+
+        function kosongkanSemuaJawapan() {
+            while (jawapanDiisi.length > 0) {
+                keluarkanHuruf(jawapanDiisi.length - 1);
+            }
+        }
+
+        function semakJawapan() {
+            stopAllAudio();
+            const dataSoalan = senaraiSoalan[indeksSoalanSemasa];
+            const jawapanTeks = jawapanDiisi.map(j => j.huruf).join('');
+
+            const kotakM = document.getElementById('kotakMaklumBalas');
+            kotakM.classList.remove('hidden');
+
+            if (jawapanTeks.length < dataSoalan.kata.length) {
+                kotakM.className = "mt-4 p-4 rounded-2xl text-center font-black text-lg bg-orange-100 text-orange-950 border-2 border-orange-300";
+                kotakM.innerText = "⚠️ Sila lengkapkan semua petak huruf!";
+                return;
+            }
+
+            if (jawapanTeks === dataSoalan.kata) {
+                // JAWAPAN BETUL (TAMBAH 20 MARKAH)
+                mainKesanBunyi('betul');
+                markahTerkumpul += 20;
+                document.getElementById('paparanMarkah').innerText = markahTerkumpul;
+
+                tunjukPopUpTambahMarkah();
+
+                setTimeout(() => {
+                    indeksSoalanSemasa++;
+                    if (indeksSoalanSemasa < senaraiSoalan.length) {
+                        muatSoalan();
+                    } else {
+                        tamatPermainan();
+                    }
+                }, 1500);
+
+            } else {
+                // JAWAPAN SALAH
+                mainKesanBunyi('salah');
+                kotakM.classList.add('hidden');
+                
+                document.getElementById('jawapanSebenarTeks').innerText = dataSoalan.kata;
+                document.getElementById('popJawapanSalah').classList.remove('hidden');
+            }
+        }
+
+        function keSoalanSeterusnyaSelepasSalah() {
+            stopAllAudio();
+            document.getElementById('popJawapanSalah').classList.add('hidden');
+            indeksSoalanSemasa++;
+            
+            if (indeksSoalanSemasa < senaraiSoalan.length) {
+                muatSoalan();
+            } else {
+                tamatPermainan();
+            }
+        }
+
+        function tunjukPopUpTambahMarkah() {
+            const pop = document.getElementById('popTambahMarkah');
+            pop.classList.remove('hidden');
+            setTimeout(() => {
+                pop.classList.add('hidden');
+            }, 1400);
+        }
+
+        /* ----------------------------------------------------
+           9. SKRIN PAPAN SKOR & MAKLUM BALAS
+           ---------------------------------------------------- */
+        function tamatPermainan() {
+            stopAllAudio();
+            document.getElementById('skrin3').classList.add('hidden');
+            document.getElementById('skrin4').classList.remove('hidden');
+
+            document.getElementById('namaMuridPapanSkor').innerText = namaMurid;
+            document.getElementById('markahAkhir').innerText = markahTerkumpul;
+
+            let mesejMaklumBalas = "";
+
+            if (markahTerkumpul === 100) {
+                mesejMaklumBalas = "Luar biasa! Anda sehebat Arnab yang laju dan segigih Kura-Kura yang pantang menyerah! Markah Penuh 100!";
+            } else if (markahTerkumpul >= 80) {
+                mesejMaklumBalas = "Hebat sekali! Anda hampir mendapat markah penuh! Teruskan usaha gigih anda!";
+            } else if (markahTerkumpul >= 60) {
+                mesejMaklumBalas = "Bagus! Usaha yang konsisten pasti membawa kejayaan manis. Teruskan membaca!";
+            } else if (markahTerkumpul >= 40) {
+                mesejMaklumBalas = "Tidak mengapa! Teruskan berlatih, anda makin bijak dan cemerlang setiap hari!";
+            } else {
+                mesejMaklumBalas = "Jangan putus asa! Kura-Kura juga bermula perlahan. Mari kita cuba lagi bersama-sama!";
+            }
+
+            document.getElementById('teksMaklumBalasUtama').innerText = mesejMaklumBalas;
+
+            // Panggil fungsi hantarKeputusanGame apabila game selesai
+            hantarKeputusanGame(namaMurid, markahTerkumpul, mesejMaklumBalas, 2);
+        }
+
+        // FUNGSI HANTAR DATA KE GOOGLE SHEETS
+        function hantarKeputusanGame(namaMurid, skorMurid, ulasanGame, jenisGame) {
+            var scriptURL = APPSCRIPT_URL;
+            var statusEl = document.getElementById('statusPenghantaran');
+
+            var dataGame = {
+                nama: namaMurid,
+                book: "KHAS ARNAB DAN KURA-KURA",
+                game: jenisGame || 2, // Setkan 1 (G1), 2 (G2), atau 3 (G3)
+                skor: skorMurid,
+                ulasan: ulasanGame || "Syabas dan teruskan!"
+            };
+
+            if (statusEl) {
+                statusEl.innerHTML = "⏳ Menghantar rekod ke Google Sheets...";
+                statusEl.className = "mb-6 text-sm font-bold text-blue-800 bg-blue-100 p-3 rounded-xl max-w-md mx-auto border border-blue-300";
+            }
+
+            fetch(scriptURL, {
+                method: "POST",
+                mode: "no-cors",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(dataGame)
+            })
+            .then(function() {
+                console.log("Data Game " + dataGame.game + " berjaya dihantar!");
+                if (statusEl) {
+                    statusEl.innerHTML = "✅ Rekod keputusan berjaya dihantar ke Google Sheets!";
+                    statusEl.className = "mb-6 text-sm font-bold text-emerald-800 bg-emerald-100 p-3 rounded-xl max-w-md mx-auto border border-emerald-300";
+                }
+            })
+            .catch(function(error) {
+                console.error("Ralat penghantaran data:", error);
+                if (statusEl) {
+                    statusEl.innerHTML = "❌ Gagal menghantar rekod keputusan!";
+                    statusEl.className = "mb-6 text-sm font-bold text-rose-800 bg-rose-100 p-3 rounded-xl max-w-md mx-auto border border-rose-300";
+                }
+            });
+        }
+
+        function semulaPermainan() {
+            stopAllAudio();
+            document.getElementById('skrin4').classList.add('hidden');
+            document.getElementById('skrin1').classList.remove('hidden');
+            document.getElementById('inputNama').value = "";
+        }
+    </script>
+</body>
+</html>
